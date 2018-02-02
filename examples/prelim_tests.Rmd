@@ -158,6 +158,35 @@ score <- evaluate(keras_model_seq, x_test, z_test)
 loss <- cbind(loss, c(score$mean_absolute_error*sd(pe$wageinc[trnidxs]), score$mean_squared_error*var(pe$wageinc[trnidxs])))
 colnames(loss)[6] <- "keras_sgd"
 
+
+keras_model_seq <- keras_model_sequential()
+keras_model_seq %>% layer_dense(units = c(P), input_shape = c(P)) %>%
+  layer_activation("linear") %>% layer_dense(1)
+
+keras_model_seq %>% compile(
+  loss = loss_mean_absolute_error,
+  optimizer = optimizer_sgd(),
+  metrics = c("mean_absolute_error", "mean_squared_error")
+)
+
+history_mae <- keras_model_seq %>% fit(x_train, z_train,
+                                   epochs = 25,
+                                   batch_size = 32,
+                                   validation_split = 0.2)
+
+plot(history_mae) + theme_minimal() + ggtitle("optimizer: stochastic gradient descent (with mean abs loss)")
+
+score <- evaluate(keras_model_seq, x_test, z_test)
+
+loss <- cbind(loss, c(score$mean_absolute_error*sd(pe$wageinc[trnidxs]), score$mean_squared_error*var(pe$wageinc[trnidxs])))
+colnames(loss)[7] <- "keras_sgd_abs_loss"
+
+
+
+
+
+
+
 round(loss, 0)
 
 # MSE and mean absolute error the same in same order?

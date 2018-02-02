@@ -218,19 +218,52 @@ score <- evaluate(keras_model_seq, x_test, z_test)
 loss <- cbind(loss, c(score$mean_absolute_error*sd(pe$wageinc[trnidxs]), score$mean_squared_error*var(pe$wageinc[trnidxs])))
 colnames(loss)[6] <- "keras_sgd"
 
+
+keras_model_seq <- keras_model_sequential()
+keras_model_seq %>% layer_dense(units = c(P), input_shape = c(P)) %>%
+  layer_activation("linear") %>% layer_dense(1)
+
+keras_model_seq %>% compile(
+  loss = loss_mean_absolute_error,
+  optimizer = optimizer_sgd(),
+  metrics = c("mean_absolute_error", "mean_squared_error")
+)
+
+history_mae <- keras_model_seq %>% fit(x_train, z_train,
+                                   epochs = 25,
+                                   batch_size = 32,
+                                   validation_split = 0.2)
+
+plot(history_mae) + theme_minimal() + ggtitle("optimizer: stochastic gradient descent (with mean abs loss)")
+```
+
+![](prelim_tests_files/figure-markdown_github-ascii_identifiers/unnamed-chunk-3-2.png)
+
+``` r
+score <- evaluate(keras_model_seq, x_test, z_test)
+
+loss <- cbind(loss, c(score$mean_absolute_error*sd(pe$wageinc[trnidxs]), score$mean_squared_error*var(pe$wageinc[trnidxs])))
+colnames(loss)[7] <- "keras_sgd_abs_loss"
+
+
+
+
+
+
+
 round(loss, 0)
 ```
 
                              nnet         lm       plm2        pl3 keras_adam
-    Mean Abs Error          24787      25786      25239      24882      25945
-    Mean Squared Error 1787254456 1852735427 1802438648 1788490321 1877684194
-                        keras_sgd
-    Mean Abs Error          25444
-    Mean Squared Error 1870422830
+    Mean Abs Error          24787      25786      25239      24882      26276
+    Mean Squared Error 1787254456 1852735427 1802438648 1788490321 1883809432
+                        keras_sgd keras_sgd_abs_loss
+    Mean Abs Error          25886              25397
+    Mean Squared Error 1857275265         1883960800
 
 ``` r
 # MSE and mean absolute error the same in same order?
 cor(loss[1,], loss[2,], method = "spearman")
 ```
 
-    [1] 0.9428571
+    [1] 0.7857143
