@@ -247,21 +247,50 @@ colnames(loss)[7] <- "keras_sgd_abs_loss"
 
 
 
+keras_model_seq <- keras_model_sequential()
+keras_model_seq %>% layer_dense(units = c(P), input_shape = c(P)) %>% layer_dropout(P/2) %>%
+  layer_dense(units = c(P)) %>% layer_dropout(P/2) %>%
+  layer_dense(units = c(P)) %>% 
+  layer_activation("linear") %>% layer_dense(1)
 
+keras_model_seq %>% compile(
+  loss = loss_mean_squared_error,
+  optimizer = optimizer_sgd(),
+  metrics = c("mean_absolute_error", "mean_squared_error")
+)
 
+history_three_layer <- keras_model_seq %>% fit(x_train, z_train,
+                                   epochs = 25,
+                                   batch_size = 32,
+                                   validation_split = 0.2)
 
-
-round(loss, 0)
+plot(history_three_layer) + theme_minimal() + ggtitle("optimizer: stochastic gradient descent (three dense layers)")
 ```
 
-                             nnet         lm       plm2        pl3 keras_adam
-    Mean Abs Error          24787      25786      25239      24882      26276
-    Mean Squared Error 1787254456 1852735427 1802438648 1788490321 1883809432
-                        keras_sgd keras_sgd_abs_loss
-    Mean Abs Error          25886              25397
-    Mean Squared Error 1857275265         1883960800
+![](prelim_tests_files/figure-markdown_github-ascii_identifiers/unnamed-chunk-3-3.png)
 
 ``` r
+score <- evaluate(keras_model_seq, x_test, z_test)
+
+loss <- cbind(loss, c(score$mean_absolute_error*sd(pe$wageinc[trnidxs]), score$mean_squared_error*var(pe$wageinc[trnidxs])))
+colnames(loss)[8] <- "keras_sgd_mse_three_layers"
+
+
+round(t(loss), 0)
+```
+
+                               Mean Abs Error Mean Squared Error
+    nnet                                24787         1787254456
+    lm                                  25786         1852735427
+    plm2                                25239         1802438648
+    pl3                                 24882         1788490321
+    keras_adam                          26557         1914270085
+    keras_sgd                           26890         1878916777
+    keras_sgd_abs_loss                  25820         1970388585
+    keras_sgd_mse_three_layers          26642         1871465071
+
+``` r
+# how do the predictions rank by the two evals?
 # MSE and mean absolute error the same in same order?
 cor(loss[1,], loss[2,], method = "spearman")
 ```
