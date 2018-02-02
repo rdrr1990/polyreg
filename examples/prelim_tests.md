@@ -173,7 +173,7 @@ keras_model_seq %>% compile(
 )
 
 history_mse <- keras_model_seq %>% fit(x_train, z_train,
-                                   epochs = 25, 
+                                   epochs = 10, 
                                    batch_size = 32,
                                    validation_split = 0.2)
 
@@ -203,7 +203,7 @@ keras_model_seq %>% compile(
 )
 
 history_mse <- keras_model_seq %>% fit(x_train, z_train,
-                                   epochs = 25,
+                                   epochs = 10,
                                    batch_size = 32,
                                    validation_split = 0.2)
 
@@ -230,7 +230,7 @@ keras_model_seq %>% compile(
 )
 
 history_mae <- keras_model_seq %>% fit(x_train, z_train,
-                                   epochs = 25,
+                                   epochs = 10,
                                    batch_size = 32,
                                    validation_split = 0.2)
 
@@ -245,7 +245,54 @@ score <- evaluate(keras_model_seq, x_test, z_test)
 loss <- cbind(loss, c(score$mean_absolute_error*sd(pe$wageinc[trnidxs]), score$mean_squared_error*var(pe$wageinc[trnidxs])))
 colnames(loss)[7] <- "keras_sgd_abs_loss"
 
+history_three_layer <- keras_model_seq %>% fit(x_train, z_train,
+                                   epochs = 10,
+                                   batch_size = 32,
+                                   validation_split = 0.2)
 
+plot(history_three_layer) + theme_minimal() + ggtitle("optimizer: stochastic gradient descent (three dense layers, 50% dropout)")
+```
+
+![](prelim_tests_files/figure-markdown_github-ascii_identifiers/unnamed-chunk-3-3.png)
+
+``` r
+score <- evaluate(keras_model_seq, x_test, z_test)
+
+loss <- cbind(loss, c(score$mean_absolute_error*sd(pe$wageinc[trnidxs]), score$mean_squared_error*var(pe$wageinc[trnidxs])))
+colnames(loss)[8] <- "keras_sgd_mse_three_layers"
+
+
+
+keras_model_seq <- keras_model_sequential()
+keras_model_seq %>% layer_dense(units = c(P), input_shape = c(P)) %>% layer_dropout(P/2) %>%
+  layer_dense(units = c(P)) %>% layer_dropout(P/2) %>%
+  layer_dense(units = c(P)) %>% layer_dropout(P/2) %>%
+  layer_dense(units = c(P)) %>% layer_dropout(P/2) %>%
+  layer_dense(units = c(P)) %>% layer_dropout(P/2) %>%
+  layer_dense(units = c(P)) %>% 
+  layer_activation("linear") %>% layer_dense(1)
+
+keras_model_seq %>% compile(
+  loss = loss_mean_squared_error,
+  optimizer = optimizer_sgd(),
+  metrics = c("mean_absolute_error", "mean_squared_error")
+)
+
+history_six_layer <- keras_model_seq %>% fit(x_train, z_train,
+                                   epochs = 10,
+                                   batch_size = 32,
+                                   validation_split = 0.2)
+
+plot(history_six_layer) + theme_minimal() + ggtitle("optimizer: stochastic gradient descent (six dense layers, 50% dropout)")
+```
+
+![](prelim_tests_files/figure-markdown_github-ascii_identifiers/unnamed-chunk-3-4.png)
+
+``` r
+score <- evaluate(keras_model_seq, x_test, z_test)
+
+loss <- cbind(loss, c(score$mean_absolute_error*sd(pe$wageinc[trnidxs]), score$mean_squared_error*var(pe$wageinc[trnidxs])))
+colnames(loss)[9] <- "keras_sgd_mse_six_layers"
 
 keras_model_seq <- keras_model_sequential()
 keras_model_seq %>% layer_dense(units = c(P), input_shape = c(P)) %>% layer_dropout(P/2) %>%
@@ -259,22 +306,6 @@ keras_model_seq %>% compile(
   metrics = c("mean_absolute_error", "mean_squared_error")
 )
 
-history_three_layer <- keras_model_seq %>% fit(x_train, z_train,
-                                   epochs = 25,
-                                   batch_size = 32,
-                                   validation_split = 0.2)
-
-plot(history_three_layer) + theme_minimal() + ggtitle("optimizer: stochastic gradient descent (three dense layers)")
-```
-
-![](prelim_tests_files/figure-markdown_github-ascii_identifiers/unnamed-chunk-3-3.png)
-
-``` r
-score <- evaluate(keras_model_seq, x_test, z_test)
-
-loss <- cbind(loss, c(score$mean_absolute_error*sd(pe$wageinc[trnidxs]), score$mean_squared_error*var(pe$wageinc[trnidxs])))
-colnames(loss)[8] <- "keras_sgd_mse_three_layers"
-
 
 round(t(loss), 0)
 ```
@@ -284,10 +315,11 @@ round(t(loss), 0)
     lm                                  25786         1852735427
     plm2                                25239         1802438648
     pl3                                 24882         1788490321
-    keras_adam                          26557         1914270085
-    keras_sgd                           26890         1878916777
-    keras_sgd_abs_loss                  25820         1970388585
-    keras_sgd_mse_three_layers          26642         1871465071
+    keras_adam                          27390         1928240796
+    keras_sgd                           25918         1875036524
+    keras_sgd_abs_loss                  25633         1921086314
+    keras_sgd_mse_three_layers          25826         1868812503
+    keras_sgd_mse_six_layers            25837         1862515347
 
 ``` r
 # how do the predictions rank by the two evals?
@@ -295,4 +327,4 @@ round(t(loss), 0)
 cor(loss[1,], loss[2,], method = "spearman")
 ```
 
-    [1] 0.7857143
+    [1] 0.8166667
