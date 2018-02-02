@@ -83,6 +83,7 @@ loss[1,4] <- mean(abs(lmpred-yorigtst))
 loss[2, 4] <- mse(lmpred, yorigtst)
 
 loss
+log10(loss)
 ```
 
 Here's a simple `keras` example (with code lightly adapted from `kerasformula`).
@@ -109,7 +110,7 @@ y_test <- pe_copy$wageinc[-trnidxs]
 
 keras_model_seq <- keras_model_sequential()
 keras_model_seq %>% layer_dense(units = c(P), input_shape = c(P)) %>%
-  layer_activation("linear") %>% layer_dropout(1/6) %>% layer_dense(1)
+  layer_activation("linear") %>% layer_dense(1)
 
 keras_model_seq %>% compile(
   loss = loss_mean_squared_error,

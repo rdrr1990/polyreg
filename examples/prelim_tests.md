@@ -128,6 +128,14 @@ loss
     Mean Abs Error     2.478746e+04 2.578643e+04 2.523922e+04 2.488243e+04
     Mean Squared Error 1.787254e+09 1.852735e+09 1.802439e+09 1.788490e+09
 
+``` r
+log10(loss)
+```
+
+                           nnet       lm     plm2      pl3
+    Mean Abs Error     4.394232 4.411391 4.402076 4.395893
+    Mean Squared Error 9.252186 9.267813 9.255860 9.252487
+
 Here's a simple `keras` example (with code lightly adapted from `kerasformula`).
 
 ``` r
@@ -152,7 +160,7 @@ y_test <- pe_copy$wageinc[-trnidxs]
 
 keras_model_seq <- keras_model_sequential()
 keras_model_seq %>% layer_dense(units = c(P), input_shape = c(P)) %>%
-  layer_activation("linear") %>% layer_dropout(1/6) %>% layer_dense(1)
+  layer_activation("linear") %>% layer_dense(1)
 
 keras_model_seq %>% compile(
   loss = loss_mean_squared_error,
@@ -180,9 +188,9 @@ loss
                                nnet           lm         plm2          pl3
     Mean Abs Error     2.478746e+04 2.578643e+04 2.523922e+04 2.488243e+04
     Mean Squared Error 1.787254e+09 1.852735e+09 1.802439e+09 1.788490e+09
-                        keras
-    Mean Abs Error         NA
-    Mean Squared Error 110856
+                          keras
+    Mean Abs Error           NA
+    Mean Squared Error 110086.9
 
 ``` r
 log10(loss)
@@ -190,4 +198,4 @@ log10(loss)
 
                            nnet       lm     plm2      pl3    keras
     Mean Abs Error     4.394232 4.411391 4.402076 4.395893       NA
-    Mean Squared Error 9.252186 9.267813 9.255860 9.252487 5.044759
+    Mean Squared Error 9.252186 9.267813 9.255860 9.252487 5.041736
