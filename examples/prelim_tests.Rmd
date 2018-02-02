@@ -115,18 +115,18 @@ keras_model_seq %>% layer_dense(units = c(P), input_shape = c(P)) %>%
 keras_model_seq %>% compile(
   loss = loss_mean_squared_error,
   optimizer = optimizer_adam(),
-  metrics = "mean_squared_error"
+  metrics = c("mean_absolute_error", "mean_squared_error")
 )
 
 history <- keras_model_seq %>% fit(x_train, y_train,
-                                   epochs = 25,
+                                   epochs = 6, # stable up to at least 25 epochs 
                                    batch_size = 32,
                                    validation_split = 0.2)
 
 plot(history) + theme_minimal()
 
 score <- evaluate(keras_model_seq, x_test, y_test)
-loss <- cbind(loss, c(NA, score$mean_squared_error * sdy + muy))
+loss <- cbind(loss, c((10^score$mean_absolute_error) - 1, (10^score$mean_squared_error) - 1))
 colnames(loss)[5] <- "keras"
 loss
 log10(loss)

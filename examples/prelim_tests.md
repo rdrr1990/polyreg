@@ -165,11 +165,11 @@ keras_model_seq %>% layer_dense(units = c(P), input_shape = c(P)) %>%
 keras_model_seq %>% compile(
   loss = loss_mean_squared_error,
   optimizer = optimizer_adam(),
-  metrics = "mean_squared_error"
+  metrics = c("mean_absolute_error", "mean_squared_error")
 )
 
 history <- keras_model_seq %>% fit(x_train, y_train,
-                                   epochs = 25,
+                                   epochs = 6, # stable up to at least 25 epochs 
                                    batch_size = 32,
                                    validation_split = 0.2)
 
@@ -180,7 +180,7 @@ plot(history) + theme_minimal()
 
 ``` r
 score <- evaluate(keras_model_seq, x_test, y_test)
-loss <- cbind(loss, c(NA, score$mean_squared_error * sdy + muy))
+loss <- cbind(loss, c((10^score$mean_absolute_error) - 1, (10^score$mean_squared_error) - 1))
 colnames(loss)[5] <- "keras"
 loss
 ```
@@ -189,13 +189,13 @@ loss
     Mean Abs Error     2.478746e+04 2.578643e+04 2.523922e+04 2.488243e+04
     Mean Squared Error 1.787254e+09 1.852735e+09 1.802439e+09 1.788490e+09
                           keras
-    Mean Abs Error           NA
-    Mean Squared Error 110086.9
+    Mean Abs Error     2.679856
+    Mean Squared Error 9.536656
 
 ``` r
 log10(loss)
 ```
 
-                           nnet       lm     plm2      pl3    keras
-    Mean Abs Error     4.394232 4.411391 4.402076 4.395893       NA
-    Mean Squared Error 9.252186 9.267813 9.255860 9.252487 5.041736
+                           nnet       lm     plm2      pl3     keras
+    Mean Abs Error     4.394232 4.411391 4.402076 4.395893 0.4281115
+    Mean Squared Error 9.252186 9.267813 9.255860 9.252487 0.9793961
