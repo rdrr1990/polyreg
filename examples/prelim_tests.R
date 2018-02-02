@@ -12,7 +12,7 @@ getPE <- function(){
 }
 
 rmse <- function(y, yhat){
-  (mean((y - yhat)^2)^0.5)
+  mean((y - yhat)^2)^0.5
 }
 
 
