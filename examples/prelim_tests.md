@@ -172,44 +172,65 @@ keras_model_seq %>% compile(
   metrics = c("mean_absolute_error", "mean_squared_error")
 )
 
-#history <- keras_model_seq %>% fit(x_train, logy_train,
-#                                   epochs = 6, # stable up to at least 25 epochs 
-#                                   batch_size = 32,
-#                                   validation_split = 0.2)
-#
-#plot(history) + theme_minimal() + ggtitle("wages on log10 scale")
-
-#keras_model_seq <- keras_model_sequential()
-#keras_model_seq %>% layer_dense(units = c(P), input_shape = c(P)) %>%
-#  layer_activation("linear") %>% layer_dense(1)
-#keras_model_seq %>% compile(
-#  loss = loss_mean_squared_error,
-#  optimizer = optimizer_adam(),
-#  metrics = c("mean_absolute_error", "mean_squared_error")
-#)
-#score_logy <- evaluate(keras_model_seq, x_test, logy_test)
-
-history_z <- keras_model_seq %>% fit(x_train, z_train,
-                                   epochs = 25, # stable up to at least 25 epochs 
-                                   batch_size = 64,
+history_mse <- keras_model_seq %>% fit(x_train, z_train,
+                                   epochs = 25, 
+                                   batch_size = 32,
                                    validation_split = 0.2)
 
-plot(history_z) + theme_minimal() + ggtitle("wages standardized")
+plot(history_mse) + theme_minimal() + ggtitle("optimizer: adam")
 ```
 
 ![](prelim_tests_files/figure-markdown_github-ascii_identifiers/unnamed-chunk-2-1.png)
 
 ``` r
-score_z <- evaluate(keras_model_seq, x_test, z_test)
+score <- evaluate(keras_model_seq, x_test, z_test)
 
-loss <- cbind(loss, c(score_z$mean_absolute_error*sd(pe$wageinc[trnidxs]), score_z$mean_squared_error*var(pe$wageinc[trnidxs])))
-colnames(loss)[5] <- "keras_z"
-loss
+loss <- cbind(loss, c(score$mean_absolute_error*sd(pe$wageinc[trnidxs]), score$mean_squared_error*var(pe$wageinc[trnidxs])))
+colnames(loss)[5] <- "keras_adam"
 ```
 
-                               nnet           lm         plm2          pl3
-    Mean Abs Error     2.478746e+04 2.578643e+04 2.523922e+04 2.488243e+04
-    Mean Squared Error 1.787254e+09 1.852735e+09 1.802439e+09 1.788490e+09
-                            keras_z
-    Mean Abs Error     2.590607e+04
-    Mean Squared Error 1.878710e+09
+Now for sgd as the optimizer...
+
+``` r
+keras_model_seq <- keras_model_sequential()
+keras_model_seq %>% layer_dense(units = c(P), input_shape = c(P)) %>%
+  layer_activation("linear") %>% layer_dense(1)
+
+keras_model_seq %>% compile(
+  loss = loss_mean_squared_error,
+  optimizer = optimizer_sgd(),
+  metrics = c("mean_absolute_error", "mean_squared_error")
+)
+
+history_mse <- keras_model_seq %>% fit(x_train, z_train,
+                                   epochs = 25,
+                                   batch_size = 32,
+                                   validation_split = 0.2)
+
+plot(history_mse) + theme_minimal() + ggtitle("optimizer: stochastic gradient descent")
+```
+
+![](prelim_tests_files/figure-markdown_github-ascii_identifiers/unnamed-chunk-3-1.png)
+
+``` r
+score <- evaluate(keras_model_seq, x_test, z_test)
+
+loss <- cbind(loss, c(score$mean_absolute_error*sd(pe$wageinc[trnidxs]), score$mean_squared_error*var(pe$wageinc[trnidxs])))
+colnames(loss)[6] <- "keras_sgd"
+
+round(loss, 0)
+```
+
+                             nnet         lm       plm2        pl3 keras_adam
+    Mean Abs Error          24787      25786      25239      24882      25945
+    Mean Squared Error 1787254456 1852735427 1802438648 1788490321 1877684194
+                        keras_sgd
+    Mean Abs Error          25444
+    Mean Squared Error 1870422830
+
+``` r
+# MSE and mean absolute error the same in same order?
+cor(loss[1,], loss[2,], method = "spearman")
+```
+
+    [1] 0.9428571

@@ -122,34 +122,48 @@ keras_model_seq %>% compile(
   metrics = c("mean_absolute_error", "mean_squared_error")
 )
 
-#history <- keras_model_seq %>% fit(x_train, logy_train,
-#                                   epochs = 6, # stable up to at least 25 epochs 
-#                                   batch_size = 32,
-#                                   validation_split = 0.2)
-#
-#plot(history) + theme_minimal() + ggtitle("wages on log10 scale")
-
-#keras_model_seq <- keras_model_sequential()
-#keras_model_seq %>% layer_dense(units = c(P), input_shape = c(P)) %>%
-#  layer_activation("linear") %>% layer_dense(1)
-#keras_model_seq %>% compile(
-#  loss = loss_mean_squared_error,
-#  optimizer = optimizer_adam(),
-#  metrics = c("mean_absolute_error", "mean_squared_error")
-#)
-#score_logy <- evaluate(keras_model_seq, x_test, logy_test)
-
-history_z <- keras_model_seq %>% fit(x_train, z_train,
-                                   epochs = 25, # stable
-                                   batch_size = 64,
+history_mse <- keras_model_seq %>% fit(x_train, z_train,
+                                   epochs = 25, 
+                                   batch_size = 32,
                                    validation_split = 0.2)
 
-plot(history_z) + theme_minimal() + ggtitle("wages standardized")
+plot(history_mse) + theme_minimal() + ggtitle("optimizer: adam")
 
-score_z <- evaluate(keras_model_seq, x_test, z_test)
+score <- evaluate(keras_model_seq, x_test, z_test)
 
-loss <- cbind(loss, c(score_z$mean_absolute_error*sd(pe$wageinc[trnidxs]), score_z$mean_squared_error*var(pe$wageinc[trnidxs])))
-colnames(loss)[5] <- "keras_z"
-loss
+loss <- cbind(loss, c(score$mean_absolute_error*sd(pe$wageinc[trnidxs]), score$mean_squared_error*var(pe$wageinc[trnidxs])))
+colnames(loss)[5] <- "keras_adam"
+```
+Now for sgd as the optimizer...
+```{r}
+keras_model_seq <- keras_model_sequential()
+keras_model_seq %>% layer_dense(units = c(P), input_shape = c(P)) %>%
+  layer_activation("linear") %>% layer_dense(1)
+
+keras_model_seq %>% compile(
+  loss = loss_mean_squared_error,
+  optimizer = optimizer_sgd(),
+  metrics = c("mean_absolute_error", "mean_squared_error")
+)
+
+history_mse <- keras_model_seq %>% fit(x_train, z_train,
+                                   epochs = 25,
+                                   batch_size = 32,
+                                   validation_split = 0.2)
+
+plot(history_mse) + theme_minimal() + ggtitle("optimizer: stochastic gradient descent")
+
+score <- evaluate(keras_model_seq, x_test, z_test)
+
+loss <- cbind(loss, c(score$mean_absolute_error*sd(pe$wageinc[trnidxs]), score$mean_squared_error*var(pe$wageinc[trnidxs])))
+colnames(loss)[6] <- "keras_sgd"
+
+round(loss, 0)
+
+# MSE and mean absolute error the same in same order?
+cor(loss[1,], loss[2,], method = "spearman")
+
+
+
 
 ```
