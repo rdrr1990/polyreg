@@ -1,9 +1,10 @@
 ---
 title: "Preliminary polyreg tests"
-author: "Pete Mohanty"
+author: "Bohdan Khomtchouk and Pete Mohanty"
 date: "2/1/2018"
 output: github_document
 ---
+
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE, message = FALSE, warning = FALSE, comment = "")
@@ -23,6 +24,7 @@ getPE <- function(){
   pe$educ <- NULL
   pe <<- pe
 }
+getPE() # code from partools, possibly on git version
 
 rmse <- function(y, yhat){
   (mean((y - yhat)^2)^0.5)
@@ -32,8 +34,6 @@ loss <- matrix(nrow = 2, ncol = 4)
 rownames(loss) <- c("Mean Abs Error", "Root Mean Squared Error")
 colnames(loss) <- c("nnet", "lm", "plm2", "pl3")
 
-
-getPE() # from partoools, possibly on git version
 pe1 <- scale(pe)
 sdy <- attr(pe1,'scaled:scale')[3]
 muy <- attr(pe1,'scaled:center')[3]

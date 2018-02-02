@@ -1,6 +1,6 @@
 Preliminary polyreg tests
 ================
-Pete Mohanty
+Bohdan Khomtchouk and Pete Mohanty
 2/1/2018
 
 ``` r
@@ -17,6 +17,7 @@ getPE <- function(){
   pe$educ <- NULL
   pe <<- pe
 }
+getPE() # code from partools, possibly on git version
 
 rmse <- function(y, yhat){
   (mean((y - yhat)^2)^0.5)
@@ -26,8 +27,6 @@ loss <- matrix(nrow = 2, ncol = 4)
 rownames(loss) <- c("Mean Abs Error", "Root Mean Squared Error")
 colnames(loss) <- c("nnet", "lm", "plm2", "pl3")
 
-
-getPE() # from partoools, possibly on git version
 pe1 <- scale(pe)
 sdy <- attr(pe1,'scaled:scale')[3]
 muy <- attr(pe1,'scaled:center')[3]
@@ -39,18 +38,18 @@ nnout <- nnet(wageinc ~ .,trn,size=8,linout=T)
 ```
 
     # weights:  57
-    initial  value 16883.823216 
-    iter  10 value 7627.611814
-    iter  20 value 7515.637661
-    iter  30 value 7477.774074
-    iter  40 value 7452.640136
-    iter  50 value 7422.246083
-    iter  60 value 7403.451529
-    iter  70 value 7394.470334
-    iter  80 value 7389.052621
-    iter  90 value 7385.862852
-    iter 100 value 7383.432738
-    final  value 7383.432738 
+    initial  value 14147.553107 
+    iter  10 value 7623.683451
+    iter  20 value 7565.856394
+    iter  30 value 7505.250071
+    iter  40 value 7462.344945
+    iter  50 value 7426.550185
+    iter  60 value 7392.915119
+    iter  70 value 7378.343718
+    iter  80 value 7369.731044
+    iter  90 value 7363.681276
+    iter 100 value 7360.517115
+    final  value 7360.517115 
     stopped after 100 iterations
 
 ``` r
@@ -87,5 +86,5 @@ loss
 ```
 
                                 nnet       lm     plm2      pl3
-    Mean Abs Error          24883.67 25886.99 25196.69 24827.72
-    Root Mean Squared Error 42652.74 43431.08 42786.77 42578.32
+    Mean Abs Error          24777.32 25788.76 25180.57 24806.14
+    Root Mean Squared Error 42659.24 43428.54 42836.71 42662.41
