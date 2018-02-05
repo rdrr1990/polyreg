@@ -3,10 +3,7 @@ Sample Collinearity
 
 This document introduces `collinearity()`, which estimates sample collinearity on a 0 to 1 scale based on generalized correlation of the X variables. The proposal is to adapt this function so that the highest degree polynomial is selected such that collinearity does not exceed say 0.95.
 
-**Background**: `collinearity` is an issue that occurs in the least squares context when *X*′*X* cannot be inverted due to the fact that at least one of the columns of X is a linear combination of the others (or a near perfect linear combination). By definition,
-
-$$ (X'X)^{-1} = \\frac{1}{det(X'X)} Adj(X'X) $$
- If one of the columns is linearly dependent, *d**e**t*(*X*′*X*) approaches 0 and the calculation becomes impossible. (Collinearity comes up of course with other methods of estimation but manifests differently, e.g. as lack of convergence.) Note that if *X* is *N* observations by *P* features, *X*′*X* is *P* x *P* and it contains similar information to the sample covariance matrix.
+**Background**: `collinearity` is an issue that occurs in the least squares context when *X*′*X* cannot be inverted due to the fact that at least one of the columns of X is a linear combination of the others (or a near perfect linear combination). By definition, $ (X'X)^{-1} = Adj(X'X) $ If one of the columns is linearly dependent, *d**e**t*(*X*′*X*) approaches 0 and the calculation becomes impossible. (Collinearity comes up of course with other methods of estimation but manifests differently, e.g. as lack of convergence.) Note that if *X* is *N* observations by *P* features, *X*′*X* is *P* x *P* and it contains similar information to the sample covariance matrix.
 
 Generalized variance is defined (e.g., T.W. Anderson) as the determinant of the covariance matrix, |*Σ*| and generalized correlation is defined analogously in terms of the correlation matrix. The function introduced below uses correlation because it is much easier to interpret since it places everything on a 0 to 1 scale, where 0 represents dependence and 1 represents independence. (For a bit of detail, see <http://statweb.stanford.edu/~sabatti/Stat200/mvn.pdf>).
 

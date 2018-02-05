@@ -16,7 +16,7 @@ If one of the columns is linearly dependent, $det(X'X)$ approaches 0 and the cal
 
 Generalized variance is defined (e.g., T.W. Anderson) as the determinant of the covariance matrix, $|\Sigma|$ and generalized correlation is defined analogously in terms of the correlation matrix. The function introduced below uses correlation because it is much easier to interpret since it places everything on a 0 to 1 scale, where 0 represents dependence and 1 represents independence. (For a bit of detail, see http://statweb.stanford.edu/~sabatti/Stat200/mvn.pdf).
 
-**Example**: Here we use the `pe` data and then call `collinearity()` on the x variables on the raw data as well as at polynomial degree 2, 3, and 4 (in the sense operationalized by `polyreg::plm()`).
+**Example**: Here we use the `pe` data and then call `collinearity()` on the x variables on the raw data as well as at polynomial degree 2 (in the sense operationalized by `polyreg::plm()`).
 
 
 ```{r}
@@ -56,7 +56,12 @@ Collinearity is quite low in the original data frame, however at polynomial degr
 collinearity(select(pe2, -wageinc, -x11))
 collinearity(pe2[,1:10])
 ```
-The original data are found in the first five columns. All columns don't create equal trouble.
+The original data are found in the first five columns. 
+
+```{r}
+collinearity(pe2[,c(1:5)])              # 0.023, same as above
+```
+All columns don't introduce equal trouble.
 
 ```{r}
 collinearity(pe2[,c(1:5, 6)])
@@ -66,4 +71,6 @@ collinearity(pe2[,c(1:5, 9)])
 collinearity(pe2[,c(1:5, 10)])
 ```
 One strategy for `polyreg` would be to pick a threshold for tolerable collinearity and pick the highest degree polynomial that does not go above that threshold (dropping additional columns as need be in a case like this one...).
+
+
 
