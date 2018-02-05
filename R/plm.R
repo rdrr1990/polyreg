@@ -1,12 +1,12 @@
-# plm: get all polynomial degrees terms of given predictor variables
-# X1, X2, deg=2 -> X1, X2, X1^2, X2^2, X1*X2
+#' plm: get all polynomial degrees terms of given predictor variables
+#' X1, X2, deg=2 -> X1, X2, X1^2, X2^2, X1*X2
 
-# combnDeg: distribute (deg) degrees to (n) different X's
-# deg_plm: deal with nondummy terms
-# only_dummy: deal with dummy terms
+#' combnDeg: distribute (deg) degrees to (n) different X's
+#' deg_plm: deal with nondummy terms
+#' only_dummy: deal with dummy terms
 
 
-# n = number of X variables (eg. X1, X2, X3 -> n=3)
+#' n = number of X variables (eg. X1, X2, X3 -> n=3)
 #' @export
 combnDeg <- function(n, deg) { # distribute (deg) degrees to (n) different X's
 
@@ -224,6 +224,20 @@ plm <- function(xydata, deg) {
   return (rt)
   #return (lm(as.vector(y)~as.matrix(result)))
 
+}
+
+#' collinearity() returns sample collinearity on 0 to 1 scale as function of generalized correlation
+#' @export
+collinearity <- function(X){
+  if(sum(is.na(X)) > 0)
+    stop("collinearity() does not accept missing data.")
+  col_sd <- apply(X, 2, sd)
+  if(min(col_sd) == 0)
+    warning(paste("The following columns do not vary:", paste(which(col_sd == 0), collase=", "), "\nIf not removed, collinearity() returns NaN.\n"))
+  # S <- cov(X)
+  # return(1 - det(S)/prod(diag(S)))
+  # equivalent to below
+  return(1 - det(cor(X)))
 }
 
 
