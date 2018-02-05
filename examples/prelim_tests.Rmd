@@ -123,7 +123,7 @@ keras_model_seq %>% compile(
 )
 
 history_mse <- keras_model_seq %>% fit(x_train, z_train,
-                                   epochs = 25, 
+                                   epochs = 10, 
                                    batch_size = 32,
                                    validation_split = 0.2)
 
@@ -147,7 +147,7 @@ keras_model_seq %>% compile(
 )
 
 history_mse <- keras_model_seq %>% fit(x_train, z_train,
-                                   epochs = 25,
+                                   epochs = 10,
                                    batch_size = 32,
                                    validation_split = 0.2)
 
@@ -170,7 +170,7 @@ keras_model_seq %>% compile(
 )
 
 history_mae <- keras_model_seq %>% fit(x_train, z_train,
-                                   epochs = 25,
+                                   epochs = 10,
                                    batch_size = 32,
                                    validation_split = 0.2)
 
@@ -181,7 +181,46 @@ score <- evaluate(keras_model_seq, x_test, z_test)
 loss <- cbind(loss, c(score$mean_absolute_error*sd(pe$wageinc[trnidxs]), score$mean_squared_error*var(pe$wageinc[trnidxs])))
 colnames(loss)[7] <- "keras_sgd_abs_loss"
 
+history_three_layer <- keras_model_seq %>% fit(x_train, z_train,
+                                   epochs = 10,
+                                   batch_size = 32,
+                                   validation_split = 0.2)
 
+plot(history_three_layer) + theme_minimal() + ggtitle("optimizer: stochastic gradient descent (three dense layers, 50% dropout)")
+
+score <- evaluate(keras_model_seq, x_test, z_test)
+
+loss <- cbind(loss, c(score$mean_absolute_error*sd(pe$wageinc[trnidxs]), score$mean_squared_error*var(pe$wageinc[trnidxs])))
+colnames(loss)[8] <- "keras_sgd_mse_three_layers"
+
+
+
+keras_model_seq <- keras_model_sequential()
+keras_model_seq %>% layer_dense(units = c(P), input_shape = c(P)) %>% layer_dropout(P/2) %>%
+  layer_dense(units = c(P)) %>% layer_dropout(P/2) %>%
+  layer_dense(units = c(P)) %>% layer_dropout(P/2) %>%
+  layer_dense(units = c(P)) %>% layer_dropout(P/2) %>%
+  layer_dense(units = c(P)) %>% layer_dropout(P/2) %>%
+  layer_dense(units = c(P)) %>% 
+  layer_activation("linear") %>% layer_dense(1)
+
+keras_model_seq %>% compile(
+  loss = loss_mean_squared_error,
+  optimizer = optimizer_sgd(),
+  metrics = c("mean_absolute_error", "mean_squared_error")
+)
+
+history_six_layer <- keras_model_seq %>% fit(x_train, z_train,
+                                   epochs = 10,
+                                   batch_size = 32,
+                                   validation_split = 0.2)
+
+plot(history_six_layer) + theme_minimal() + ggtitle("optimizer: stochastic gradient descent (six dense layers, 50% dropout)")
+
+score <- evaluate(keras_model_seq, x_test, z_test)
+
+loss <- cbind(loss, c(score$mean_absolute_error*sd(pe$wageinc[trnidxs]), score$mean_squared_error*var(pe$wageinc[trnidxs])))
+colnames(loss)[9] <- "keras_sgd_mse_six_layers"
 
 keras_model_seq <- keras_model_sequential()
 keras_model_seq %>% layer_dense(units = c(P), input_shape = c(P)) %>% layer_dropout(P/2) %>%
@@ -194,18 +233,6 @@ keras_model_seq %>% compile(
   optimizer = optimizer_sgd(),
   metrics = c("mean_absolute_error", "mean_squared_error")
 )
-
-history_three_layer <- keras_model_seq %>% fit(x_train, z_train,
-                                   epochs = 25,
-                                   batch_size = 32,
-                                   validation_split = 0.2)
-
-plot(history_three_layer) + theme_minimal() + ggtitle("optimizer: stochastic gradient descent (three dense layers)")
-
-score <- evaluate(keras_model_seq, x_test, z_test)
-
-loss <- cbind(loss, c(score$mean_absolute_error*sd(pe$wageinc[trnidxs]), score$mean_squared_error*var(pe$wageinc[trnidxs])))
-colnames(loss)[8] <- "keras_sgd_mse_three_layers"
 
 
 round(t(loss), 0)
