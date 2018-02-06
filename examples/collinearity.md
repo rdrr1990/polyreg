@@ -10,6 +10,24 @@ $$ (X'X)^{-1} = \\frac{1}{det(X'X)} Adj(X'X) $$
 
 Generalized variance is defined (e.g., T.W. Anderson) as the determinant of the covariance matrix, |*Σ*| and generalized correlation is defined analogously in terms of the correlation matrix. The function introduced below uses correlation because it is much easier to interpret since it places everything on a 0 to 1 scale, where 0 represents dependence and 1 represents independence. (For a bit of detail, see <http://statweb.stanford.edu/~sabatti/Stat200/mvn.pdf>).
 
+**Code**: Here is the source code for `collinearity()`.
+
+``` r
+collinearity <- function(X){
+  
+  if(sum(is.na(X)) > 0)
+    stop("collinearity() does not accept missing data.")
+  
+  col_sd <- apply(X, 2, sd)
+  if(min(col_sd) == 0)
+    warning(paste("The following columns do not vary:", paste(which(col_sd == 0), collase=", "), "\nIf not removed, collinearity() returns NaN.\n"))
+  # S <- cov(X)
+  # return(1 - det(S)/prod(diag(S)))
+  # equivalent to below
+  return(1 - det(cor(X)))
+}
+```
+
 **Example**: Here we use the `pe` data and then call `collinearity()` on the x variables on the raw data as well as at polynomial degree 2 (in the sense operationalized by `polyreg::plm()`).
 
 ``` r
